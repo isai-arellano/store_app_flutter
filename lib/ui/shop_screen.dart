@@ -1,20 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:store_app_flutter/data/models/cart.dart';
 import 'package:store_app_flutter/data/models/shoe.dart';
 import 'package:store_app_flutter/ui/components/shoe_tile.dart';
 
-class ShopScreen extends StatelessWidget {
+class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
 
   @override
+  State<ShopScreen> createState() => _ShopScreenState();
+}
+
+class _ShopScreenState extends State<ShopScreen> {
+  // Agregar item shoe al carrito
+  void addShoeToCart(Shoe shoe){
+    Provider.of<Cart>(context, listen: false).addItemToCart(shoe);
+
+    showDialog(context: context, 
+    builder: (context) => const AlertDialog( 
+      title: Text('Successfully added'),
+      content: Text('Check your cart'),
+    )
+    );
+
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
+    return Consumer<Cart>(builder:(context, value, child) => Column(
       children: [
         Container(
-          padding: EdgeInsets.all(12),
-          margin: EdgeInsets.symmetric(horizontal: 25),
+          padding: const EdgeInsets.all(12),
+          margin: const EdgeInsets.symmetric(horizontal: 25),
           decoration: BoxDecoration(
               color: Colors.grey[100], borderRadius: BorderRadius.circular(8)),
-          child: Row(
+          child: const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [Text("Search"), Icon(Icons.search)],
           ),
@@ -52,12 +72,13 @@ class ShopScreen extends StatelessWidget {
             itemCount: 4,
             scrollDirection: Axis.horizontal,
             itemBuilder: (context, index) {
-              Shoe shoe = Shoe(
-                  name: 'Nike Down',
-                  price: '240',
-                  imagePath: 'lib/images/1.png',
-                  description: 'description');
-              return ShoeTile(shoe: shoe);
+              // Crea el item shoe
+             Shoe shoe = value.getShoeList()[index];
+              // Retorna el item show
+              return ShoeTile(
+                shoe: shoe,
+                onTap: () => addShoeToCart(shoe),
+                );
             },
           ),
         ),
@@ -68,6 +89,7 @@ class ShopScreen extends StatelessWidget {
           ),
         )
       ],
+      ),
     );
   }
 }
